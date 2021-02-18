@@ -1,0 +1,115 @@
+<div class="col-md-8 form-group">
+  <input type="file" class="form-control" (change)="onFileChange($event)" placeholder="Upload file" multiple="false" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+</div>
+
+
+<table class="sjs-table">
+  <tr *ngFor="let row of data">
+    <td *ngFor="let val of row">
+      {{val}}
+    </td>
+  </tr>
+</table>
+
+
+<!-- <form class="form-group" [formGroup]="form">
+  <div formArrayName="deals">
+  <table class="table-bordered">
+  <tr>
+  <th>coluna1</th>
+  <th>coluna2</th>
+  <th>coluna3</th>
+  <th>coluna4</th>
+  <th>coluna5</th>
+  </tr>
+  <tr *ngFor="let x of form.get('deals').controls;let i=index;" [formGroupName]="i">
+  <td><input class="form-control" formControlName="coluna1"></td>
+  <td><input class="form-control" formControlName="coluna2"></td>
+  <td><input class="form-control" formControlName="coluna3"></td>
+  <td><input class="form-control" formControlName="coluna4"></td>
+  <td><input class="form-control" formControlName="coluna5"></td>
+  </tr>
+  </table>
+  </div> -->
+
+  <form [formGroup]="form" autocomplete="off">
+    <mat-table [dataSource]="dataSource">
+
+      <!-- <ng-container matColumnDef="coluna1">
+        <mat-header-cell *matHeaderCellDef> Coluna1 </mat-header-cell>
+        <mat-cell *matCellDef="let element" > {{element.get('coluna1').value}} </mat-cell>
+        <mat-error *ngIf="true" >
+            "teste OK"
+        </mat-error>
+      </ng-container> -->
+
+      <div *ngFor="let x of colunas;let i=index;">
+        <ng-container matColumnDef='{{x.nameexcel}}'>
+          <mat-header-cell *matHeaderCellDef> {{x.nametable}} </mat-header-cell>
+          <mat-cell *matCellDef="let element;" [formGroup]="element">
+            <mat-form-field>
+              <input matInput placeholder='{{x.nameexcel}}' formControlName='{{x.nameexcel}}'>
+              <mat-error *ngIf="checkError(x.nameexcel,'required', element )">
+                Coluna is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </mat-cell>
+        </ng-container>
+      </div>
+
+      <!-- <ng-container matColumnDef="coluna1">
+        <mat-header-cell *matHeaderCellDef> Coluna1 </mat-header-cell>
+        <mat-cell *matCellDef="let element;" [formGroup]="element">
+          <mat-form-field>
+            <input matInput placeholder="coluna1" formControlName="coluna1">
+            <mat-error *ngIf="checkError('coluna1','required', element )">
+              Coluna is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="coluna2">
+        <mat-header-cell *matHeaderCellDef> Coluna2 </mat-header-cell>
+        <mat-cell *matCellDef="let element;" [formGroup]="element">
+          <mat-form-field>
+            <input matInput placeholder="coluna2" formControlName="coluna2">
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+
+      <ng-container matColumnDef="coluna3">
+        <mat-header-cell *matHeaderCellDef> Coluna3 </mat-header-cell>
+        <mat-cell *matCellDef="let element;" [formGroup]="element">
+          <mat-form-field>
+            <input matInput placeholder="coluna3" formControlName="coluna3">
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+
+      <ng-container matColumnDef="coluna4">
+        <mat-header-cell *matHeaderCellDef> Coluna4 </mat-header-cell>
+        <mat-cell *matCellDef="let element;" [formGroup]="element">
+          <mat-form-field>
+            <input matInput placeholder="coluna4" formControlName="coluna4">
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="coluna5">
+        <mat-header-cell *matHeaderCellDef> Coluna5 </mat-header-cell>
+        <mat-cell *matCellDef="let element;" [formGroup]="element">
+          <mat-form-field>
+            <input matInput placeholder="coluna5" formControlName="coluna5">
+          </mat-form-field>
+        </mat-cell>
+      </ng-container> -->
+
+
+
+      <mat-header-row *matHeaderRowDef="colunasdefault"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: colunasdefault;"></mat-row>
+    </mat-table>
+</form>
