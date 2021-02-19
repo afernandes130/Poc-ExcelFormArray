@@ -48,7 +48,7 @@
           <mat-header-cell *matHeaderCellDef> {{x.nametable}} </mat-header-cell>
           <mat-cell *matCellDef="let element;" [formGroup]="element">
             <mat-form-field>
-              <input matInput placeholder='{{x.nameexcel}}' formControlName='{{x.nameexcel}}'>
+              <input matInput placeholder='{{x.nameexcel}}' [readonly]='x.isreadOnly' formControlName='{{x.nameexcel}}'>
               <mat-error *ngIf="checkError(x.nameexcel,'required', element )">
                 Coluna is <strong>required</strong>
               </mat-error>

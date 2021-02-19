@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import * as XLSX from 'xlsx'
 
@@ -16,7 +16,7 @@ export class UploadfileComponent implements OnInit {
   file!:File;
   arrayBuffer : any
   filelist : any
-  colunasdefault : any[] = ["coluna1","coluna2","coluna3", "coluna4","coluna5"];
+  colunasdefault : any[] = []
   dataSource!: MatTableDataSource<any>;
 
   colunas : any = [
@@ -24,7 +24,6 @@ export class UploadfileComponent implements OnInit {
       "nameexcel": "coluna1",
       "nametable": "Coluna 1",
       "isreadOnly": "true"
-
     },
     {
       "nameexcel": "coluna2",
@@ -46,17 +45,19 @@ export class UploadfileComponent implements OnInit {
       "nametable": "Coluna 5",
       "isreadOnly": "false"
     }
-
+    ,
+    {
+      "nameexcel": "coluna6",
+      "nametable": "Coluna 6",
+      "isreadOnly": "false"
+    }
   ]
 
-
   form : any;
-
-
   data!: AOA
 	wopts: XLSX.WritingOptions = { bookType: 'xlsx', type: 'array' };
 	fileName: string = 'SheetJS.xlsx';
-  constructor() { }
+  constructor(private fb : FormBuilder) { }
 
   ngOnInit(): void {
     this.form = new FormGroup({deals : new FormArray([])})
@@ -104,54 +105,98 @@ export class UploadfileComponent implements OnInit {
       this.data = <AOA>(XLSX.utils.sheet_to_json(ws, {header: 1}));
 
       /* Validação colunas*/
-      console.log(this.header_diff(this.colunasdefault,this.data[0]))
-
-      console.log(this.data)
-
-      this.loadform(this.data)
-
-      this.dataSource = new MatTableDataSource((this.form.get('deals') as FormArray).controls);
-      console.log(this.dataSource)
-
+      console.log("DIFF", this.headerIsComplete(this.colunasdefault,this.data[0]))
+      if(this.headerIsComplete(this.colunasdefault,this.data[0])){
+        this.getColumnDefault()
+        this.loadform(this.data)
+        this.dataSource = new MatTableDataSource((this.form.get('deals') as FormArray).controls);
+        console.log("dataSource",this.dataSource)
+      }
     };
     reader.readAsBinaryString(target.files[0]);
   }
 
-  loadform(dados: any){
-    for (let index = 1; index < dados.length; index++) {
-      const line = dados[index];
-      this.form.get('deals').push(new FormGroup({
-        coluna1 : new FormControl(line[0], [Validators.required]),
-        coluna2 : new FormControl(line[1], [Validators.required]),
-        coluna3 : new FormControl(line[2], [Validators.required]),
-        coluna4 : new FormControl(line[3], [Validators.required]),
-        coluna5 : new FormControl(line[4], [Validators.required]),
-      }))
-      console.log("Line", line[0])
-    console.log("FORM", this.form)
-    }
-
-
-    // this.ToDoListForm.get(‘items’).push(new FormGroup({
-    //   title:new FormControl(dat[x].title,[Validators.required]),
-    //   completed:new FormControl(dat[x].completed,[Validators.required]),
-    //   priority:new FormControl(dat[x].priority,[Validators.required])
-    //   }))
+  getColumnDefault(){
+    this.colunas.forEach((coluna : any) => {
+      this.colunasdefault.push(coluna.nameexcel)
+    });
   }
 
-  header_diff (a1 : any[], a2 : any[]) {
+  loadform(dados: any){
+    // this.colunas.forEach((coluna : any) => {
+    //   coluna.index = dados[0].indexOf(coluna.nameexcel)
+    //   console.log(coluna.nameexcel,dados[0].indexOf(coluna.nameexcel))
+    // });
+
+    // console.log("colunaaaa", this.colunas);
+
+    // this.colunas.sort(function (a : any, b: any) {
+    //   if (a.index > b.index) {
+    //     return 1;
+    //   }
+    //   if (a.index < b.index) {
+    //     return -1;
+    //   }
+    //   // a must be equal to b
+    //   return 0;
+    // });
+
+    // console.log("colunaBBBBBBBBBBBB", this.colunas);
+    // this.colunas.forEach((coluna : any) => {
+    //   this.colunasdefault.push(coluna.nameexcel)
+    // });
+
+    // for (let index = 1; index < dados.length; index++) {
+    //   const line = dados[index];
+    //   this.form.get('deals').push(new FormGroup({
+    //     coluna1 : new FormControl(line[0], [Validators.required]),
+    //     coluna2 : new FormControl(line[1], [Validators.required]),
+    //     coluna3 : new FormControl(line[2], [Validators.required]),
+    //     coluna4 : new FormControl(line[3], [Validators.required]),
+    //     coluna5 : new FormControl(line[4], [Validators.required]),
+    //   }))
+    //   console.log("Line", line[0])
+
+
+
+    for (let index = 1; index < dados.length; index++) {
+      const line = dados[index];
+      var teste = dados[0][0];
+      this.form.get('deals').push(this.mountFormGoup(dados, line))
+
+    console.log("FORM", this.form)
+    this.mountFormGoup(dados, line)
+
+    }
+
+  }
+
+  mountFormGoup(dados: any[][], line : any){
+    let obj : any = {} ;
+    for (let index = 0; index < dados[0][0].length; index++) {
+      obj[dados[0][index]] = new FormControl(line[index], Validators.required);
+    }
+    return this.fb.group(obj)
+  }
+
+  headerIsComplete (a1 : any[], a2 : any[]) {
 
     let intersectionA = a1.filter(x=> a2.includes(x))
     let diferenceA = a1.filter(x => !intersectionA.includes(x))
+    console.log("DIFF", diferenceA.length);
 
-    return diferenceA;
+    if (diferenceA.length === 0){
+      return true
+    }
+    else {
+      return false
+    }
+
+
+
   }
 
   public checkError = (controlName: string, errorName: string, element : FormGroup) => {
-    //return this.addShopFormGroup.controls[controlName].hasError(errorName);
-    console.log("controlName:", controlName, " errorName:", errorName, " Value:", element.controls[controlName].value);
-    console.log("Element:", element.controls[controlName].hasError(errorName));
-    console.log("Element:", element.controls[controlName]);
     return element.controls[controlName].hasError(errorName);
   }
 
